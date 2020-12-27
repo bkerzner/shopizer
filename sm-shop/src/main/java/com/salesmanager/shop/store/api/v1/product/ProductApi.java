@@ -425,6 +425,50 @@ public class ProductApi {
     }
   }
 
+  @RequestMapping(value = "/products/recommended", method = RequestMethod.GET)
+  @ResponseBody
+  @ApiImplicitParams({
+      @ApiImplicitParam(name = "store", dataType = "String", defaultValue = "DEFAULT"),
+      @ApiImplicitParam(name = "lang", dataType = "String", defaultValue = "en")
+  })
+  public ReadableProductList listRecommended(
+      @RequestParam(value = "lang", required = false) String lang,
+      @RequestParam(value = "category", required = true) Long category,
+      @ApiIgnore MerchantStore merchantStore,
+      @ApiIgnore Language language,
+      HttpServletRequest request,
+      HttpServletResponse response)
+      throws Exception {
+
+    ProductCriteria criteria = new ProductCriteria();
+    
+    if (lang != null) {
+      criteria.setLanguage(lang);
+    } else {
+      criteria.setLanguage(language.getCode());
+    }
+    if (category != null) {
+      List<Long> categoryIds = new ArrayList<Long>();
+      categoryIds.add(category);
+      criteria.setCategoryIds(categoryIds);
+    }
+    criteria.setRecommended(true);
+
+    try {
+      return productFacade.getProductListsByCriterias(merchantStore, language, criteria);
+
+    } catch (Exception e) {
+
+      LOGGER.error("Error while filtering products product", e);
+      try {
+        response.sendError(503, "Error while filtering products " + e.getMessage());
+      } catch (Exception ignore) {
+      }
+
+      return null;
+    }
+  }
+  
   /**
    * API for getting a product
    *

@@ -24,6 +24,8 @@ public class ProductCriteria extends Criteria {
 	
 	private Long ownerId = null;
 
+	private boolean recommended;
+	
 	public String getProductName() {
 		return productName;
 	}
@@ -97,6 +99,12 @@ public class ProductCriteria extends Criteria {
 		this.ownerId = ownerId;
 	}
 
+	public boolean isRecommended() {
+		return recommended;
+	}
 
+	public void setRecommended(boolean recommended) {
+		this.recommended = recommended;
+	}
 
 }

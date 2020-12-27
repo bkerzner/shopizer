@@ -27,6 +27,8 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProductRepositoryImpl.class);
 	
+	private final String RECOMMENDED_WHERE_CLAUSE = " and price.productPriceSpecialAmount is not null and price.productPriceSpecialAmount <= price.productPriceAmount * 0.8";
+	
     @PersistenceContext
     private EntityManager em;
 
@@ -639,6 +641,11 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 			}
 		}
 
+		if (criteria.isRecommended()) {
+			countBuilderSelect.append(" INNER JOIN p.price price");
+			countBuilderWhere.append(RECOMMENDED_WHERE_CLAUSE);
+		}
+
 		Query countQ = this.em.createQuery(
 				countBuilderSelect.toString() + countBuilderWhere.toString());
 
@@ -742,6 +749,9 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 		
 		qs.append(" left join fetch p.relationships pr");
 		
+		if (criteria.isRecommended()) {
+			qs.append("inner join p.price price ");
+		}
 
 		qs.append(" where merch.id=:mId");
 		if(criteria.getLanguage() != null && !criteria.getLanguage().equals("_all")) {
@@ -798,6 +808,11 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 			}
 
 		}
+
+		if (criteria.isRecommended()) {
+			qs.append(RECOMMENDED_WHERE_CLAUSE);
+		}
+		
 		qs.append(" order by p.sortOrder asc");
 
 
